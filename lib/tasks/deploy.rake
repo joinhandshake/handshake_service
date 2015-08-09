@@ -1,5 +1,3 @@
-require 'librato/metrics'
-
 # A collection of rake tasks to deploy applications to heroku. At the basic level, all that needs to be called
 # in most cases is
 #
