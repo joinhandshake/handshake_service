@@ -1,11 +1,13 @@
 module HandshakeService
   class Railtie < Rails::Railtie
     rake_tasks do
+      # TODO: Iterate through the directory
+      load 'tasks/auto_annotate_models.rake'
       load 'tasks/deploy.rake'
-      Dir[File.expand_path("tasks/*.rake", File.dirname(__FILE__))].each { |ext|
-        puts ext
-        puts load ext
-      }
+      load 'tasks/elasticsearch.rake'
+      load 'tasks/heroku.rake'
+      load 'tasks/invalids.rake'
+      load 'tasks/rspec_generator.rake'
     end
   end
 end
