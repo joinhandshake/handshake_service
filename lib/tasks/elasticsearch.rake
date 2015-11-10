@@ -81,7 +81,6 @@ if defined?(Rails)
         klass = Kernel.const_get(name.classify)
         reindex_model(klass, true)
       end
-
     end
   end
 end

@@ -107,6 +107,13 @@ private
     puts 'Deploying site to Heroku ...'
     puts "git push git@heroku.com:#{@app}.git #{branch_to_branch}"
     puts `git push git@heroku.com:#{@app}.git #{branch_to_branch}`
+
+    # Set the latest app version so that caching and other code know what version of code
+    # is running. See Rails.cache.set_expanded_key method.
+    latest_commit = `git rev-parse HEAD`.first(6)
+    puts "heroku config:set RAILS_APP_VERSION=#{latest_commit} -a #{@app}"
+    puts `heroku config:set RAILS_APP_VERSION=#{latest_commit} -a #{@app}`
+
     print_current_time
   end
 
