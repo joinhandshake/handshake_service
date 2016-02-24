@@ -91,7 +91,7 @@ private
 
   def turn_on_preboot
     puts 'Turning on preboot...'
-    puts `heroku features:enable -a #{@app} preboot`
+    Bundler.with_clean_env { puts `heroku features:enable -a #{@app} preboot` }
     print_current_time
   end
 
@@ -112,7 +112,7 @@ private
     # is running. See Rails.cache.set_expanded_key method.
     latest_commit = `git rev-parse HEAD`.first(6)
     puts "heroku config:set RAILS_APP_VERSION=#{latest_commit} -a #{@app}"
-    puts `heroku config:set RAILS_APP_VERSION=#{latest_commit} -a #{@app}`
+    Bundler.with_clean_env { puts `heroku config:set RAILS_APP_VERSION=#{latest_commit} -a #{@app}` }
 
     print_current_time
   end
@@ -136,7 +136,7 @@ private
   def backup
     puts 'Backing up the database...'
     puts "heroku pgbackups:capture --expire --app #{@app}'"
-    puts `heroku pgbackups:capture --expire --app #{@app}`
+    Bundler.with_clean_env { puts `heroku pgbackups:capture --expire --app #{@app}` }
     print_current_time
   end
 

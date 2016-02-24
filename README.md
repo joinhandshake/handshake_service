@@ -20,7 +20,12 @@ Or install it yourself as:
 
 ## Usage
 
-Use rake tasks as you see fit.
+## LibratoHelper
+
+Use LibratoHelper as a wrapper around Librato for sanitizing key names and simplifying the API. Examples:
+
+```HandshakeService::LibratoHelper.increment 'handshake_office.doc_to_pdf.count'```
+```HandshakeService::LibratoHelper.measure 'handshake_office.doc_to_pdf.timing'```
 
 ## deploy:<env>
 
