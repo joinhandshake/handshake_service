@@ -97,7 +97,7 @@ private
 
   def turn_off_preboot
     puts 'Turning off preboot...'
-    puts `heroku features:disable -a #{@app} preboot`
+    Bundler.with_clean_env { puts `heroku features:disable -a #{@app} preboot` }
     print_current_time
   end
 
