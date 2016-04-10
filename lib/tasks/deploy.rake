@@ -13,6 +13,8 @@ class RakeHerokuDeployer
     @app_env = app_env
     @app = ENV["#{app_env.to_s.upcase}_APP_NAME"]
     @start_time = Time.now.to_i
+    # On deployer app, we must use 'vendor/heroku-toolbelt/bin/heroku'
+    @heroku_cli = ENV['HEROKU_EXECUTABLE'] || 'heroku'
 
     if @app.blank?
       puts "Please add #{app_env.to_s.upcase}_APP_NAME environment variable in order to deploy"
@@ -32,18 +34,14 @@ class RakeHerokuDeployer
   end
 
   def run_migrations
-    #start_deploy;  turn_off_preboot; push; turn_app_off; backup; migrate; restart; run_data_migrations; turn_app_on; tag; stop_deploy;
-    start_deploy; turn_off_preboot; backup; push; migrate; restart; run_data_migrations; tag; stop_deploy;
+    #start_deploy;  turn_off_preboot; push; turn_app_off; migrate; restart; run_data_migrations; turn_app_on; tag; stop_deploy;
+    start_deploy; turn_off_preboot; push; migrate; restart; run_data_migrations; tag; stop_deploy; turn_on_preboot;
   end
 
   def deploy
     # turn_on_preboot; push; restart; tag;
     start_deploy; turn_on_preboot; push; run_data_migrations; tag; stop_deploy;
     #start_deploy;  push; turn_app_off; run_data_migrations; turn_app_on; tag; stop_deploy;
-  end
-
-  def backup_deploy
-    backup; deploy;
   end
 
   def rollback
@@ -90,8 +88,8 @@ private
   end
 
   def turn_on_preboot
-    puts 'Turning on preboot...'
-    Bundler.with_clean_env { puts `heroku features:enable -a #{@app} preboot` }
+    puts 'Turning on preboot...'`
+    Bundler.with_clean_env { puts `#{@heroku_cli} features:enable -a #{@app} preboot` }
     print_current_time
   end
 
@@ -111,15 +109,15 @@ private
     # Set the latest app version so that caching and other code know what version of code
     # is running. See Rails.cache.set_expanded_key method.
     latest_commit = `git rev-parse HEAD`.first(6)
-    puts "heroku config:set RAILS_APP_VERSION=#{latest_commit} -a #{@app}"
-    Bundler.with_clean_env { puts `heroku config:set RAILS_APP_VERSION=#{latest_commit} -a #{@app}` }
+    puts "#{@heroku_cli} config:set RAILS_APP_VERSION=#{latest_commit} -a #{@app}"
+    Bundler.with_clean_env { puts `#{@heroku_cli} config:set RAILS_APP_VERSION=#{latest_commit} -a #{@app}` }
 
     print_current_time
   end
 
   def restart
     puts 'Restarting app servers ...'
-    Bundler.with_clean_env { puts `heroku restart --app #{@app}` }
+    Bundler.with_clean_env { puts `#{@heroku_cli} restart --app #{@app}` }
     print_current_time
   end
 
@@ -133,16 +131,9 @@ private
     print_current_time
   end
 
-  def backup
-    puts 'Backing up the database...'
-    puts "heroku pgbackups:capture --expire --app #{@app}'"
-    Bundler.with_clean_env { puts `heroku pgbackups:capture --expire --app #{@app}` }
-    print_current_time
-  end
-
   def migrate
     puts 'Running database migrations ...'
-    Bundler.with_clean_env { puts `heroku run 'bundle exec rake db:migrate LOG_LEVEL=info' --app #{@app}` }
+    Bundler.with_clean_env { puts `#{@heroku_cli} run 'bundle exec rake db:migrate LOG_LEVEL=info' --app #{@app}` }
     print_current_time
   end
 
@@ -151,19 +142,19 @@ private
   end
 
   def run_custom_command_cleanly(command, detached = false, log_level = 'info')
-    Bundler.with_clean_env { puts `heroku run#{detached ? ':detached' : ''} '#{command} LOG_LEVEL=#{log_level}' --app #{@app}` }
+    Bundler.with_clean_env { puts `#{@heroku_cli} run#{detached ? ':detached' : ''} '#{command} LOG_LEVEL=#{log_level}' --app #{@app}` }
     print_current_time
   end
 
   def turn_app_off
     puts 'Putting the app into maintenance mode ...'
-    Bundler.with_clean_env { puts `heroku maintenance:on --app #{@app}` }
+    Bundler.with_clean_env { puts `#{@heroku_cli} maintenance:on --app #{@app}` }
     print_current_time
   end
 
   def turn_app_on
     puts 'Taking the app out of maintenance mode ...'
-    Bundler.with_clean_env { puts `heroku maintenance:off --app #{@app}` }
+    Bundler.with_clean_env { puts `#{@heroku_cli} maintenance:off --app #{@app}` }
     print_current_time
   end
 
@@ -211,11 +202,6 @@ namespace :deploy do
       deployer.run_migrations
     end
 
-    task :backup_deploy do
-      deployer = RakeHerokuDeployer.new(:staging)
-      deployer.backup_deploy
-    end
-
     task :rollback do
       deployer = RakeHerokuDeployer.new(:staging)
       deployer.rollback
@@ -238,11 +224,6 @@ namespace :deploy do
       deployer.run_migrations
     end
 
-    task :backup_deploy do
-      deployer = RakeHerokuDeployer.new(:demo)
-      deployer.backup_deploy
-    end
-
     task :rollback do
       deployer = RakeHerokuDeployer.new(:demo)
       deployer.rollback
@@ -263,11 +244,6 @@ namespace :deploy do
     task :migrations do
       deployer = RakeHerokuDeployer.new(:production)
       deployer.run_migrations
-    end
-
-    task :backup_deploy do
-      deployer = RakeHerokuDeployer.new(:production)
-      deployer.backup_deploy
     end
 
     task :rollback do
@@ -303,15 +279,6 @@ namespace :deploy do
       deployer.run_migrations
       deployer2.run_migrations
       deployer3.run_migrations
-    end
-
-    task :backup_deploy do
-      deployer = RakeHerokuDeployer.new(:staging)
-      deployer2 = RakeHerokuDeployer.new(:demo)
-      deployer3 = RakeHerokuDeployer.new(:production)
-      deployer.backup_deploy
-      deployer2.backup_deploy
-      deployer3.backup_deploy
     end
 
     task :preboot do
