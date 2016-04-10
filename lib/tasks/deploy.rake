@@ -88,7 +88,7 @@ private
   end
 
   def turn_on_preboot
-    puts 'Turning on preboot...'`
+    puts 'Turning on preboot...'
     Bundler.with_clean_env { puts `#{@heroku_cli} features:enable -a #{@app} preboot` }
     print_current_time
   end
