@@ -13,7 +13,7 @@ class RakeHerokuDeployer
     @app_env = app_env
     @app = ENV["#{app_env.to_s.upcase}_APP_NAME"]
     @start_time = Time.now.to_i
-    # On deployer app, we must use 'vendor/heroku-toolbelt/bin/heroku'
+    # On deployer app, we must use '~/vendor/heroku-toolbelt/bin/heroku'
     @heroku_cli = ENV['HEROKU_EXECUTABLE'] || 'heroku'
 
     if @app.blank?
