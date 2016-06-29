@@ -29,7 +29,7 @@ module HandshakeService
 
     # http://dev.librato.com/v1/metric-attributes
     def self.sanitize_metric_name(metric_name)
-      metric_name.gsub(/[^A-Za-z0-9.:-_]/) { '-' }.first(63)
+      metric_name.gsub(/[^A-Za-z0-9.:-_]/) { '-' }.first(255)
     end
   end
 end
