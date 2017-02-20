@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "bugsnag"
   spec.add_runtime_dependency "librato-rails"
+  spec.add_runtime_dependency "knockoff"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
