@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib", "lib/handshake_service"]
 
-  spec.add_runtime_dependency "bugsnag"
+  spec.add_runtime_dependency "bugsnag", '6.6.0'
   spec.add_runtime_dependency "librato-rails"
 
   spec.add_development_dependency "bundler"
